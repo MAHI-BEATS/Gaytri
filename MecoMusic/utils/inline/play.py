@@ -64,13 +64,13 @@ def stream_markup_timer(_, chat_id, played, dur):
     else:
         bar = "————————𖣐"
 
-     s_map = get_style_map()
+    s_map = get_style_map()  # ✅ FIXED INDENTATION
     buttons = [
-                [
+        [
             InlineKeyboardButton(
                 text=f"{played} {bar} {dur}",
                 callback_data="GetTimer",
-                 style=s_map[5],
+                style=s_map[5],
             )
         ],
         [
@@ -78,17 +78,16 @@ def stream_markup_timer(_, chat_id, played, dur):
            # InlineKeyboardButton(text="", callback_data=f"ADMIN Pause|{chat_id}", icon_custom_emoji_id=5409042015415448331),
            # InlineKeyboardButton(text="", callback_data=f"ADMIN Stop|{chat_id}", icon_custom_emoji_id=5408832111773757273),
         ],
-                        [
-         InlineKeyboardButton(text=_["S_B_3"], url=f"https://t.me/{app.username}?startgroup=true", style=s_map[5]),
+        [
+            InlineKeyboardButton(text=_["S_B_3"], url=f"https://t.me/{app.username}?startgroup=true", style=s_map[5]),
         ],
         [
-         InlineKeyboardButton(text="• ᴏᴡɴᴇʀ •", url="https://t.me/ll_DEVIL_SHIV_ll", style=s_map[5]),
-         InlineKeyboardButton(text="• ɢʀᴏᴜᴘ •", url="https://t.me/betabot_support", style=s_map[5]),
+            InlineKeyboardButton(text="• ᴏᴡɴᴇʀ •", url="https://t.me/ll_DEVIL_SHIV_ll", style=s_map[5]),
+            InlineKeyboardButton(text="• ɢʀᴏᴜᴘ •", url="https://t.me/betabot_support", style=s_map[5]),
         ],
         [InlineKeyboardButton(text=_["CLOSE_BUTTON"], callback_data="close")],
     ]
     return buttons
-
 
 
 def stream_markup(_, chat_id):
@@ -99,12 +98,12 @@ def stream_markup(_, chat_id):
            # InlineKeyboardButton(text="", callback_data=f"ADMIN Pause|{chat_id}", icon_custom_emoji_id=5409042015415448331),
            # InlineKeyboardButton(text="", callback_data=f"ADMIN Stop|{chat_id}", icon_custom_emoji_id=5408832111773757273),
         ],
-                         [
-         InlineKeyboardButton(text=_["S_B_3"], url=f"https://t.me/{app.username}?startgroup=true", style=s_map[5]),
+        [
+            InlineKeyboardButton(text=_["S_B_3"], url=f"https://t.me/{app.username}?startgroup=true", style=s_map[5]),
         ],
         [
-         InlineKeyboardButton(text="• ᴏᴡɴᴇʀ •", url="https://t.me/ll_DEVIL_SHIV_ll", style=s_map[5]),
-         InlineKeyboardButton(text="• ɢʀᴏᴜᴘ •", url="https://t.me/betabot_support", style=s_map[5]),
+            InlineKeyboardButton(text="• ᴏᴡɴᴇʀ •", url="https://t.me/ll_DEVIL_SHIV_ll", style=s_map[5]),
+            InlineKeyboardButton(text="• ɢʀᴏᴜᴘ •", url="https://t.me/betabot_support", style=s_map[5]),
         ],
         [InlineKeyboardButton(text=_["CLOSE_BUTTON"], callback_data="close")],
     ]
