@@ -33,11 +33,11 @@ DURATION_LIMIT = int(getenv("DURATION_LIMIT", 14400)) # 5 hours
 VIDEO_DURATION_LIMIT = int(getenv("VIDEO_DURATION_LIMIT", 14400)) # 5 hours
 
 # Chat id of a group for logging bot's activities
-LOGGER_ID = int(getenv("LOGGER_ID", -1002715747653))
+LOGGER_ID = int(getenv("LOGGER_ID", -1003812209413))
 
 # Get this value from @FallenxBot on Telegram by /id
-OWNER_ID = int(getenv("OWNER_ID", 6006232114))
-OWNER_USERNAME = getenv("OWNER_USERNAME", "ITZZ_ISTKHAR")
+OWNER_ID = int(getenv("OWNER_ID", 8418584090))
+OWNER_USERNAME = getenv("OWNER_USERNAME", "ll_DEVIL_SHIV_ll")
 
 SUDO_USERS = list(map(int, getenv("SUDO_USERS", str(OWNER_ID)).split()))
 
@@ -49,15 +49,15 @@ HEROKU_API_KEY = getenv("HEROKU_API_KEY")
 
 UPSTREAM_REPO = getenv(
     "UPSTREAM_REPO",
-    "https://github.com/TEAM-ISTKHAR/Gaytri",
+    "https://github.com/MAHI-BEATS/Gaytri",
 )
 UPSTREAM_BRANCH = getenv("UPSTREAM_BRANCH", "main")
 GIT_TOKEN = getenv(
-    "GIT_TOKEN", "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",
+    "GIT_TOKEN", "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",
 )  # Fill this variable if your upstream repository is private
 
-SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/KavyaBots")
-SUPPORT_CHAT = getenv("SUPPORT_CHAT", "https://t.me/+F_bzkjjibWY1YzM1")
+SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/betabot_hub")
+SUPPORT_CHAT = getenv("SUPPORT_CHAT", "https://t.me/betabot_support")
 
 # Set this to True if you want the assistant to automatically leave chats after an interval
 AUTO_LEAVING_ASSISTANT = bool(getenv("AUTO_LEAVING_ASSISTANT", False))
@@ -103,20 +103,20 @@ autoclean = []
 confirmer = {}
 
 
-START_IMG_URL = ["https://files.catbox.moe/m6reh8.jpg",
-                 "https://files.catbox.moe/m6reh8.jpg",
-                 "https://files.catbox.moe/m6reh8.jpg",]
+START_IMG_URL = ["https://files.catbox.moe/je87i5.jpg",
+                 "https://files.catbox.moe/u4db8r.jpg",
+                 "https://files.catbox.moe/ubyk6k.jpg",]
     
 PING_IMG_URL = getenv(
-    "PING_IMG_URL", "https://files.catbox.moe/a29r15.jpg"
+    "PING_IMG_URL", "https://files.catbox.moe/zgy7zs.jpg"
 )
 PLAYLIST_IMG_URL = "https://files.catbox.moe/sg5a4c.jpg"
-STATS_IMG_URL = "https://files.catbox.moe/sg5a4c.jpg"
-TELEGRAM_AUDIO_URL = "https://files.catbox.moe/hkh8gr.jpg"
-TELEGRAM_VIDEO_URL = "https://files.catbox.moe/hkh8gr.jpg"
+STATS_IMG_URL = "https://files.catbox.moe/zgy7zs.jpg"
+TELEGRAM_AUDIO_URL = "https://files.catbox.moe/zgy7zs.jpg"
+TELEGRAM_VIDEO_URL = "https://files.catbox.moe/zgy7zs.jpg"
 STREAM_IMG_URL = "https://files.catbox.moe/hkh8gr.jpg"
 SOUNCLOUD_IMG_URL = "https://graph.org/file/c95a687e777b55be1c792.jpg"
-YOUTUBE_IMG_URL = "https://graph.org/file/e8730fdece86a1166f608.jpg"
+YOUTUBE_IMG_URL = "https://files.catbox.moe/zgy7zs.jpg"
 SPOTIFY_ARTIST_IMG_URL = "https://strad-dev131.github.io/TeamXsrc/img/sp_artist.jpg"
 SPOTIFY_ALBUM_IMG_URL = "https://strad-dev131.github.io/TeamXsrc/img/sp_album.jpg"
 SPOTIFY_PLAYLIST_IMG_URL = "https://strad-dev131.github.io/TeamXsrc/img/sp_playlist.jpg"
