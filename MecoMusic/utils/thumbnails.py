@@ -9,14 +9,12 @@ from ytSearch import VideosSearch
 from MecoMusic import YouTube, app
 from config import YOUTUBE_IMG_URL
 
-# --- Constants ---
+# Layout Constants
 CANVAS_SIZE = (1280, 720)
 FRAME_RECT = (374, 118, 906, 626)
 ART_RECT = (402, 146, 878, 452)
 INFO_RECT = (392, 474, 888, 602)
 TITLE_AREA_WIDTH = 316
-
-# --- Helper Functions ---
 
 def changeImageSize(maxWidth, maxHeight, image):
     return ImageOps.contain(
@@ -46,12 +44,21 @@ def add_round_corners(image, radius):
     output.paste(rounded, (0, 0), mask)
     return output
 
+def circle(image, size):
+    avatar = fit_image(image.convert("RGBA"), (size, size))
+    mask = Image.new("L", (size, size), 0)
+    draw = ImageDraw.Draw(mask)
+    draw.ellipse((0, 0, size, size), fill=255)
+    output = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    output.paste(avatar, (0, 0), mask)
+    return output
+
 def clear(text):
     words = text.split(" ")
     title = ""
-    for i in words:
-        if len(title) + len(i) < 60:
-            title += " " + i
+    for word in words:
+        if len(title) + len(word) < 60:
+            title += " " + word
     return title.strip()
 
 def load_font(name, size):
@@ -72,9 +79,16 @@ def truncate_text(draw, text, font, max_width):
 def add_glow_layer():
     glow_layer = Image.new("RGBA", CANVAS_SIZE, (0, 0, 0, 0))
     draw = ImageDraw.Draw(glow_layer)
+    
+    # Original dynamic glows
     draw.ellipse((70, 360, 530, 770), fill=(255, 112, 72, 82))
     draw.ellipse((710, 40, 1140, 380), fill=(94, 182, 255, 56))
     draw.ellipse((600, 430, 1160, 860), fill=(255, 196, 108, 40))
+    
+    # --- THE SHIV GLOW (Bottom Neon) ---
+    # Centered at the bottom, wide spread, vivid blue/purple hue
+    draw.ellipse((140, 640, 1140, 880), fill=(138, 43, 226, 110)) 
+    
     return glow_layer.filter(ImageFilter.GaussianBlur(90))
 
 def add_shadow(rect, radius, blur, offset=(0, 18)):
@@ -89,23 +103,6 @@ def add_shadow(rect, radius, blur, offset=(0, 18)):
     )
     return shadow.filter(ImageFilter.GaussianBlur(blur))
 
-def draw_text_with_glow(draw, position, text, font, fill, glow_fill, iterations=3):
-    """Creates a glowing text effect by layering blurred versions of the text."""
-    x, y = position
-    glow_img = Image.new("RGBA", CANVAS_SIZE, (0, 0, 0, 0))
-    glow_draw = ImageDraw.Draw(glow_img)
-    
-    for i in range(iterations):
-        glow_draw.text((x, y), text, font=font, fill=(*glow_fill, 80))
-    
-    glow_img = glow_img.filter(ImageFilter.GaussianBlur(3))
-    # Paste glow onto the background
-    draw._image.alpha_composite(glow_img)
-    # Draw sharp text on top
-    draw.text(position, text, font=font, fill=fill)
-
-# --- Main Logic ---
-
 async def get_thumb(videoid, user_id):
     final_path = f"cache/{videoid}_{user_id}.png"
     raw_thumb_path = f"cache/thumb{videoid}.png"
@@ -116,35 +113,34 @@ async def get_thumb(videoid, user_id):
         return final_path
 
     try:
-        # Fetch Metadata
         try:
-            result = await VideosSearch(videoid, limit=1).result()
-            result = result['result'][0] if result['result'] else None
+            results = VideosSearch(videoid, limit=1)
+            result = (await results.next())["result"][0]
         except:
             result = None
 
         if result and result.get("title"):
             title = re.sub(r"\W+", " ", result["title"]).title()
-            duration = result.get("duration") or "Unknown Mins"
+            duration = result.get("duration", "Unknown Mins")
             thumbnail = result["thumbnails"][0]["url"].split("?")[0]
-            views = result.get("viewCount", {}).get("short") or "Unknown Views"
-            channel = result.get("channel", {}).get("name") or "Unknown Channel"
+            views = result.get("viewCount", {}).get("short", "Unknown Views")
+            channel = result.get("channel", {}).get("name", "Unknown Channel")
         else:
             title, duration, _, thumbnail, _ = await YouTube.details(videoid, True)
             title = re.sub(r"\W+", " ", title).title()
             views = "Unknown Views"
             channel = "Unknown Channel"
 
-        # Download Thumbnail
         async with aiohttp.ClientSession() as session:
             async with session.get(thumbnail) as resp:
                 if resp.status == 200:
-                    async with aiofiles.open(raw_thumb_path, mode="wb") as f:
-                        await f.write(await resp.read())
+                    f = await aiofiles.open(raw_thumb_path, mode="wb")
+                    await f.write(await resp.read())
+                    await f.close()
                 else:
                     return thumbnail
 
-        # User Photos
+        # User Photo Handling
         requester_photo = None
         fallback_photo = None
         for target_id in (user_id, app.id):
@@ -163,39 +159,41 @@ async def get_thumb(videoid, user_id):
         youtube = Image.open(raw_thumb_path).convert("RGBA")
         background = fit_image(youtube, CANVAS_SIZE)
         background = background.filter(ImageFilter.GaussianBlur(16))
-        background = ImageEnhance.Brightness(background).enhance(0.90)
-        background = ImageEnhance.Color(background).enhance(0.70)
+        background = ImageEnhance.Brightness(background).enhance(0.85)
+        background = ImageEnhance.Color(background).enhance(0.75)
 
         canvas = Image.new("RGBA", CANVAS_SIZE, (0, 0, 0, 255))
         canvas.alpha_composite(background)
-        canvas.alpha_composite(Image.new("RGBA", CANVAS_SIZE, (10, 12, 18, 116)))
+        canvas.alpha_composite(Image.new("RGBA", CANVAS_SIZE, (10, 12, 18, 110))) # Dark overlay
         canvas.alpha_composite(add_glow_layer())
         canvas.alpha_composite(add_shadow(FRAME_RECT, radius=40, blur=28))
         canvas.alpha_composite(add_shadow(ART_RECT, radius=28, blur=18, offset=(0, 12)))
 
-        # Drawing Frame
+        # Frame Drawing
         frame_layer = Image.new("RGBA", CANVAS_SIZE, (0, 0, 0, 0))
         frame_draw = ImageDraw.Draw(frame_layer)
-        frame_draw.rounded_rectangle(FRAME_RECT, radius=40, fill=(255, 255, 255, 54), outline=(255, 255, 255, 176), width=2)
-        frame_draw.rounded_rectangle((FRAME_RECT[0] + 12, FRAME_RECT[1] + 12, FRAME_RECT[2] - 12, FRAME_RECT[3] - 12), radius=32, fill=(255, 255, 255, 12))
+        frame_draw.rounded_rectangle(
+            FRAME_RECT, radius=40, fill=(255, 255, 255, 45), outline=(255, 255, 255, 150), width=2
+        )
         canvas.alpha_composite(frame_layer)
 
-        # Artwork
+        # Artwork Placement
         artwork_size = (ART_RECT[2] - ART_RECT[0], ART_RECT[3] - ART_RECT[1])
         artwork = add_round_corners(fit_image(youtube, artwork_size), 28)
         canvas.alpha_composite(artwork, (ART_RECT[0], ART_RECT[1]))
 
-        # Info Box and Chips
+        # Info Section
         info_layer = Image.new("RGBA", CANVAS_SIZE, (0, 0, 0, 0))
         info_draw = ImageDraw.Draw(info_layer)
-        info_draw.rounded_rectangle(INFO_RECT, radius=26, fill=(44, 44, 52, 196), outline=(255, 255, 255, 58), width=1)
+        info_draw.rounded_rectangle(INFO_RECT, radius=26, fill=(20, 20, 25, 200), outline=(255, 255, 255, 50), width=1)
         
+        # UI Chips (Duration, Views, Brand)
         duration_rect = (ART_RECT[2] - 136, ART_RECT[1] + 18, ART_RECT[2] - 18, ART_RECT[1] + 64)
         views_rect = (ART_RECT[0] + 18, ART_RECT[3] - 58, ART_RECT[0] + 168, ART_RECT[3] - 16)
         brand_rect = (ART_RECT[0] + 18, ART_RECT[1] + 18, ART_RECT[0] + 164, ART_RECT[1] + 58)
 
         for rect in (duration_rect, views_rect, brand_rect):
-            info_draw.rounded_rectangle(rect, radius=18, fill=(12, 14, 18, 182), outline=(255, 255, 255, 68), width=1)
+            info_draw.rounded_rectangle(rect, radius=18, fill=(0, 0, 0, 180), outline=(255, 255, 255, 40), width=1)
         canvas.alpha_composite(info_layer)
 
         # Avatar
@@ -204,47 +202,24 @@ async def get_thumb(videoid, user_id):
             avatar_source = Image.open(requester_photo).convert("RGBA")
         elif fallback_photo and os.path.isfile(fallback_photo):
             avatar_source = Image.open(fallback_photo).convert("RGBA")
+        
         avatar = add_round_corners(fit_image(avatar_source, (96, 96)), 24)
         canvas.alpha_composite(avatar, (INFO_RECT[0] + 18, INFO_RECT[1] + 16))
 
-        # Fonts and Text
+        # Typography
         draw = ImageDraw.Draw(canvas)
-        title_font = load_font("font2.ttf", 46)
+        title_font = load_font("font2.ttf", 45)
         meta_font = load_font("font.ttf", 25)
         small_font = load_font("font.ttf", 22)
         chip_font = load_font("font.ttf", 23)
-        branding_font = load_font("font.ttf", 28)
 
         safe_title = truncate_text(draw, title, title_font, TITLE_AREA_WIDTH)
-        safe_brand = truncate_text(draw, f"Powered By : {app.name}", meta_font, TITLE_AREA_WIDTH)
         safe_channel = truncate_text(draw, channel, small_font, 210)
-        safe_views = truncate_text(draw, views, chip_font, 118)
-        safe_duration = truncate_text(draw, duration, chip_font, 92)
-        app_badge = truncate_text(draw, app.name, chip_font, 118)
-
+        
         text_x = INFO_RECT[0] + 136
-        draw.text((text_x, INFO_RECT[1] + 12), safe_title, fill="white", font=title_font)
-        draw.text((text_x, INFO_RECT[1] + 62), safe_brand, fill=(236, 236, 236), font=meta_font)
-        draw.text((text_x, INFO_RECT[1] + 96), f"{safe_channel}  |  {safe_duration}", fill=(219, 219, 219), font=small_font)
-
-        # Draw text inside chips
-        draw.text((brand_rect[0] + 16, brand_rect[1] + 10), app_badge, fill="white", font=chip_font)
-        draw.text((views_rect[0] + 18, views_rect[1] + 7), safe_views, fill="white", font=chip_font)
-        draw.text((duration_rect[0] + 18, duration_rect[1] + 8), safe_duration, fill="white", font=chip_font)
-
-        # --- NEW BRANDING TEXTS AT BOTTOM CORNERS ---
-        
-        # Left Bottom: BETA BOT HUB (Cyan glow)
-        draw_text_with_glow(
-            draw, (85, 635), "BETA BOT HUB", branding_font,
-            fill=(0, 255, 255), glow_fill=(0, 255, 255)
-        )
-        
-        # Right Bottom: 👑 THE SHIV (Pink/Magenta glow)
-        draw_text_with_glow(
-            draw, (980, 650), "👑 THE SHIV", branding_font,
-            fill=(255, 50, 200), glow_fill=(255, 50, 200)
-        )
+        draw.text((text_x, INFO_RECT[1] + 15), safe_title, fill="white", font=title_font)
+        draw.text((text_x, INFO_RECT[1] + 65), f"By {app.name}", fill=(200, 200, 200), font=meta_font)
+        draw.text((text_x, INFO_RECT[1] + 98), f"{safe_channel} | {duration}", fill=(180, 180, 180), font=small_font)
 
         # Cleanup and Save
         try: os.remove(raw_thumb_path)
@@ -252,7 +227,7 @@ async def get_thumb(videoid, user_id):
         
         canvas.convert("RGB").save(final_path, quality=95)
         return final_path
-
+        
     except Exception as e:
         print(f"Error: {e}")
         return raw_thumb_path if os.path.isfile(raw_thumb_path) else thumbnail
