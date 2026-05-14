@@ -30,101 +30,81 @@ from MecoMusic import LOGGER
 @LanguageStart
 async def start_pm(client, message: Message, _):
     await add_served_user(message.from_user.id)
-
-    typing_message = await message.reply("BETA..BOTS..❤️‍🔥")
-    
-    
-    typing_text = "𝖲ᴛᴀʀᴛɪɴɢ...❤️‍🔥"
-    
-    for i in range(1, len(typing_text) + 1):  
+    name = (message.text).lower()
+    if name[0:4] == "help":
+        keyboard = help_pannel(_)
         try:
-            await typing_message.edit_text(typing_text[:i])
-            await asyncio.sleep(0.001)  
-        except Exception as e:
-            print(f"Error while editing message : {e}")  
-
-    await asyncio.sleep(2)  
-    await typing_message.delete()  
-
-    if len(message.text.split()) > 1:
-        name = message.text.split(None, 1)[1]
-
-        if name[0:3] == "del":
-            await del_plist_msg(client=client, message=message, _=_)
-        if name[0:4] == "help":
-            keyboard = help_pannel(_)
-            try:
-                await message.reply_sticker("CAACAgUAAxkBAAFJgZ1qBGwx9Z9vW5BhG3dw0l1A5j4CyQACXRYAAuc-wVWs4--9DGlDKzsE")
-            except:
-                pass
-            return await message.reply_photo(
-                photo=random.choice(config.START_IMG_URL),
-                caption=_["help_1"].format(config.SUPPORT_CHAT),
-                reply_markup=keyboard,
+            await message.reply_sticker("CAACAgUAAxkBAAFJgZ1qBGwx9Z9vW5BhG3dw0l1A5j4CyQACXRYAAuc-wVWs4--9DGlDKzsE")
+        except:
+            pass
+        return await message.reply_photo(
+            photo=random.choice(config.START_IMG_URL),
+            caption=_["help_1"].format(config.SUPPORT_CHAT),
+            reply_markup=keyboard,
+        )
+    if name[0:3] == "sud":
+        await sudoers_list(client=client, message=message, _=_)
+        if await is_on_off(2):
+            return await app.send_message(
+                chat_id=config.LOGGER_ID,
+                text=f"{message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ ᴛᴏ ᴄʜᴇᴄᴋ <b>sᴜᴅᴏʟɪsᴛ</b>.\n\n<b>ᴜsᴇʀ ɪᴅ :</b> <code>{message.from_user.id}</code>\n<b>ᴜsᴇʀɴᴀᴍᴇ :</b> @{message.from_user.username}",
             )
-        if name[0:3] == "sud":
-            await sudoers_list(client=client, message=message, _=_)
-            if await is_on_off(2):
-                return await app.send_message(
-                    chat_id=config.LOGGER_ID,
-                    text=f"{message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ ᴛᴏ ᴄʜᴇᴄᴋ <b>sᴜᴅᴏʟɪsᴛ</b>.\n\n<b>ᴜsᴇʀ ɪᴅ :</b> <code>{message.from_user.id}</code>\n<b>ᴜsᴇʀɴᴀᴍᴇ :</b> @{message.from_user.username}",
-                )
-            return
-        if name[0:3] == "inf":
-            m = await message.reply_text("🔎")
-            query = (str(name)).replace("info_", "", 1)
-            try:
-                result = await Video.get(query)
-            except Exception:
-                result = None
-            if not result or not result.get("title"):
-                return await m.edit_text("Failed to fetch track information.")
-            thumbnails = result.get("thumbnails") or []
-            thumbnail = config.YOUTUBE_IMG_URL
-            for thumb in thumbnails:
-                if isinstance(thumb, dict) and thumb.get("url"):
-                    thumbnail = thumb["url"].split("?")[0]
-                    break
-            title = result["title"]
-            duration = (result.get("duration") or {}).get("text") or "Unknown"
-            view_count = result.get("viewCount") or {}
-            views = view_count.get("short") or view_count.get("text") or "Unknown Views"
-            channel_data = result.get("channel") or {}
-            channellink = channel_data.get("link") or config.SUPPORT_CHAT
-            channel = channel_data.get("name") or "Unknown Channel"
-            link = result.get("link") or f"https://www.youtube.com/watch?v={query}"
-            published = result.get("publishedTime") or "Unknown"
-            searched_text = _["start_6"].format(
-                title, duration, views, published, channellink, channel, app.mention
-            )
-            key = InlineKeyboardMarkup(
+        return
+    if name[0:3] == "inf":
+        m = await message.reply_text("🔎")
+        query = (str(name)).replace("info_", "", 1)
+        try:
+            result = await VideosSearch(query, 1).next()  # Fixed: VideosSearch
+        except Exception:
+            result = None
+        if not result or not result.get("title"):
+            return await m.edit_text("Failed to fetch track information.")
+        thumbnails = result.get("thumbnails") or []
+        thumbnail = config.YOUTUBE_IMG_URL
+        for thumb in thumbnails:
+            if isinstance(thumb, dict) and thumb.get("url"):
+                thumbnail = thumb["url"].split("?")[0]
+                break
+        title = result["title"]
+        duration = (result.get("duration") or {}).get("text") or "Unknown"
+        view_count = result.get("viewCount") or {}
+        views = view_count.get("short") or view_count.get("text") or "Unknown Views"
+        channel_data = result.get("channel") or {}
+        channellink = channel_data.get("link") or config.SUPPORT_CHAT
+        channel = channel_data.get("name") or "Unknown Channel"
+        link = result.get("link") or f"https://www.youtube.com/watch?v={query}"
+        published = result.get("publishedTime") or "Unknown"
+        searched_text = _["start_6"].format(
+            title, duration, views, published, channellink, channel, app.mention
+        )
+        key = InlineKeyboardMarkup(
+            [
                 [
-                    [
-                        InlineKeyboardButton(
-                            text=_["S_B_8"],
-                            url=link,
-                            style=ButtonStyle.PRIMARY,
-                        ),
-                        InlineKeyboardButton(
-                            text=_["S_B_9"],
-                            url=config.SUPPORT_CHAT,
-                            style=ButtonStyle.SUCCESS,
-                        ),
-                    ],
-                ]
+                    InlineKeyboardButton(
+                        text=_["S_B_8"],
+                        url=link,
+                        style=ButtonStyle.PRIMARY,
+                    ),
+                    InlineKeyboardButton(
+                        text=_["S_B_9"],
+                        url=config.SUPPORT_CHAT,
+                        style=ButtonStyle.SUCCESS,
+                    ),
+                ],
+            ]
+        )
+        await m.delete()
+        await app.send_photo(
+            chat_id=message.chat.id,
+            photo=thumbnail,
+            caption=searched_text,
+            reply_markup=key,
+        )
+        if await is_on_off(2):
+            return await app.send_message(
+                chat_id=config.LOGGER_ID,
+                text=f"{message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ ᴛᴏ ᴄʜᴇᴄᴋ <b>ᴛʀᴀᴄᴋ ɪɴғᴏʀᴍᴀᴛɪᴏɴ</b>.\n\n<b>ᴜsᴇʀ ɪᴅ :</b> <code>{message.from_user.id}</code>\n<b>ᴜsᴇʀɴᴀᴍᴇ :</b> @{message.from_user.username}",
             )
-            await m.delete()
-            await app.send_photo(
-                chat_id=message.chat.id,
-                photo=thumbnail,
-                caption=searched_text,
-                reply_markup=key,
-            )
-            if await is_on_off(2):
-                return await app.send_message(
-                    chat_id=config.LOGGER_ID,
-                    text=f"{message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ ᴛᴏ ᴄʜᴇᴄᴋ <b>ᴛʀᴀᴄᴋ ɪɴғᴏʀᴍᴀᴛɪᴏɴ</b>.\n\n<b>ᴜsᴇʀ ɪᴅ :</b> <code>{message.from_user.id}</code>\n<b>ᴜsᴇʀɴᴀᴍᴇ :</b> @{message.from_user.username}",
-                )
     else:
         out = private_panel(_)
         try:
