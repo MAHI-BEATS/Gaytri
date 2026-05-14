@@ -30,12 +30,31 @@ from MecoMusic import LOGGER
 @LanguageStart
 async def start_pm(client, message: Message, _):
     await add_served_user(message.from_user.id)
+
+    typing_message = await message.reply("BETA..BOTS..❤️‍🔥")
+    
+    
+    typing_text = "𝖲ᴛᴀʀᴛɪɴɢ...❤️‍🔥"
+    
+    for i in range(1, len(typing_text) + 1):  
+        try:
+            await typing_message.edit_text(typing_text[:i])
+            await asyncio.sleep(0.001)  
+        except Exception as e:
+            print(f"Error while editing message : {e}")  
+
+    await asyncio.sleep(2)  
+    await typing_message.delete()  
+
     if len(message.text.split()) > 1:
         name = message.text.split(None, 1)[1]
+
+        if name[0:3] == "del":
+            await del_plist_msg(client=client, message=message, _=_)
         if name[0:4] == "help":
             keyboard = help_pannel(_)
             try:
-                await message.reply_sticker("CAACAgUAAx0CdQO5IgACMTplUFOpwDjf-UC7pqVt9uG659qxWQACfQkAAghYGFVtSkRZ5FZQXDME")
+                await message.reply_sticker("CAACAgUAAxkBAAFJgZ1qBGwx9Z9vW5BhG3dw0l1A5j4CyQACXRYAAuc-wVWs4--9DGlDKzsE")
             except:
                 pass
             return await message.reply_photo(
