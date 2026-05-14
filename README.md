@@ -42,7 +42,7 @@
 
 Click the button below to deploy the bot on Heroku instantly:
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://dashboard.heroku.com/new?template=https://github.com/TEAM-ISTKHAR/Gaytri)
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://dashboard.heroku.com/new?template=https://github.com/MAHI-BEATS/Gaytri)
 
 ---
 
